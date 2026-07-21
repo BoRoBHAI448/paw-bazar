@@ -20,8 +20,14 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await login(formData);
-            router.push('/');
+            const res = await login(formData);
+            const loggedUser = res?.user || res?.data?.user;
+
+            if (loggedUser?.role === 'admin') {
+                router.push('/admin');
+            } else {
+                router.push('/');
+            }
         } catch (err) {
             setError(err?.response?.data?.message || 'Login failed. Invalid credentials!');
         } finally {

@@ -66,4 +66,49 @@ class OrderController extends Controller
             'orders' => $orders
         ]);
     }
+
+    // Admin: Get ALL orders from ALL users
+    public function adminIndex(Request $request)
+    {
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.'
+            ], 403);
+        }
+
+        $orders = Order::with(['items.product', 'user:id,name,email'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'orders' => $orders
+        ]);
+    }
+
+    // Admin: Update an order's status
+    public function updateStatus(Request $request, $id)
+    {
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Admin access required.'
+            ], 403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:pending,processing,completed,cancelled',
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order status updated successfully!',
+            'order' => $order->load(['items.product', 'user:id,name,email'])
+        ]);
+    }
 }

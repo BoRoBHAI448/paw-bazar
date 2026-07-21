@@ -24,7 +24,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']); // Safety er jonno /profile o thaklo
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Order Routes
+    // Order Routes (logged-in user's own orders)
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
+
+    // Admin Order Routes (role check handled inside the controller)
+    Route::get('/admin/orders', [OrderController::class, 'adminIndex']);
+    Route::put('/admin/orders/{id}/status', [OrderController::class, 'updateStatus']);
 });

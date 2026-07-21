@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
         try {
             const res = await authService.getProfile();
-            setUser(res.data || res);
+            setUser(res.data?.user || res.data || res);;
         } catch (err) {
             console.error('Failed to load user:', err);
             Cookies.remove('token');
