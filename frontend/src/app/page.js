@@ -6,8 +6,8 @@ import { ArrowRight, ShieldCheck, Truck, Headphones } from 'lucide-react';
 // SSR Fetching Products
 async function getProducts() {
   try {
-    const data = await productService.getAllProducts();
-    // Api response Structure anujayi data extract kora (Array or data property)
+    // productService.getProducts call kora hocche
+    const data = await productService.getProducts();
     return Array.isArray(data) ? data : data?.data || [];
   } catch (error) {
     console.error('Failed to fetch products:', error);

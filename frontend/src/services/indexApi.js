@@ -1,27 +1,22 @@
-import api from './api';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
-export const indexApi = {
-    // Helper GET Method
-    get: async (url, params = {}) => {
-        const response = await api.get(url, { params });
-        return response.data;
+export const indexApi = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api',
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
     },
+});
 
-    // Helper POST Method
-    post: async (url, data = {}) => {
-        const response = await api.post(url, data);
-        return response.data;
+// Request Interceptor: Attach Bearer Token automatically
+indexApi.interceptors.request.use(
+    (config) => {
+        const token = Cookies.get('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
     },
-
-    // Helper PUT Method
-    put: async (url, data = {}) => {
-        const response = await api.put(url, data);
-        return response.data;
-    },
-
-    // Helper DELETE Method
-    delete: async (url) => {
-        const response = await api.delete(url);
-        return response.data;
-    }
-};
+    (error) => Promise.reject(error)
+);

@@ -1,18 +1,16 @@
 import { indexApi } from './indexApi';
 
 export const productService = {
-    // All Products get kora
-    getAllProducts: async (params = {}) => {
-        return await indexApi.get('/products', params);
+    // Get all products
+    getProducts: async () => {
+        const response = await indexApi.get('/products');
+        // Response array kina check ebong safe return
+        return response.data?.data || response.data || [];
     },
 
-    // Single Product Detail get kora (ID/Slug diye)
+    // Get single product details
     getProductById: async (id) => {
-        return await indexApi.get(`/products/${id}`);
+        const response = await indexApi.get(`/products/${id}`);
+        return response.data?.data || response.data;
     },
-
-    // Featured Products/Categories (Jodi backend API filter support kare)
-    getCategories: async () => {
-        return await indexApi.get('/categories');
-    }
 };
