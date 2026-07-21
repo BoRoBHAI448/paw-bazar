@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { ShoppingCart, Star } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 
 export default function ProductCard({ product }) {
-    // Fallback image jodi product-er image url na thake
+    const { addToCart } = useCart();
     const defaultImage = 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=500&q=80';
 
     return (
@@ -52,7 +53,11 @@ export default function ProductCard({ product }) {
                         </span>
                     </div>
 
-                    <button className="bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white p-2.5 rounded-xl transition-all duration-200">
+                    <button
+                        onClick={() => addToCart(product)}
+                        className="bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white p-2.5 rounded-xl transition-all duration-200 active:scale-95"
+                        title="Add to Cart"
+                    >
                         <ShoppingCart className="w-4 h-4" />
                     </button>
                 </div>
