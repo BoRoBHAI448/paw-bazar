@@ -1,4 +1,4 @@
-import { indexApi } from './indexApi';
+import indexApi from './api';
 
 export const orderService = {
     // Submit new order
@@ -7,9 +7,9 @@ export const orderService = {
         return response.data;
     },
 
-    // Get current user's order history
+    // Get Logged-in User's Orders
     getUserOrders: async () => {
-        const response = await indexApi.get('/orders');
-        return response.data?.data || response.data || [];
+        const response = await indexApi.get('/orders'); // ba /my-orders (Laravel route onujayi)
+        return response.data;
     },
 };
