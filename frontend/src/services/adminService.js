@@ -25,4 +25,16 @@ export const adminService = {
         const response = await indexApi.delete(`/products/${id}`);
         return response.data;
     },
+
+    // 5. Get ALL orders (from all users) — admin only
+    getAllOrders: async () => {
+        const response = await indexApi.get('/admin/orders');
+        return response.data;
+    },
+
+    // 6. Update an order's status — admin only
+    updateOrderStatus: async (id, status) => {
+        const response = await indexApi.put(`/admin/orders/${id}/status`, { status });
+        return response.data;
+    },
 };
