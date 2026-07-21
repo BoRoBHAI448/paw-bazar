@@ -63,10 +63,13 @@ export function CartProvider({ children }) {
     const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
     const totalPrice = cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * item.quantity, 0);
 
+    // src/context/CartContext.js
+
     return (
         <CartContext.Provider
             value={{
-                cartItems,
+                cart: cartItems,      // <--- Ei line-ta add/update koro
+                cartItems,            // duita-i rakha bhalo
                 addToCart,
                 removeFromCart,
                 updateQuantity,

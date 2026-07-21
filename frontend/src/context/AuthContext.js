@@ -10,37 +10,49 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // App load hoile token ache kina check kora
-    useEffect(() => {
+    // Load User Profile from Backend
+    const loadUser = async () => {
         const token = Cookies.get('token');
-        if (token) {
-            authService.getProfile()
-                .then((data) => setUser(data))
-                .catch(() => Cookies.remove('token'))
-                .finally(() => setLoading(false));
-        } else {
+        if (!token) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const res = await authService.getProfile();
+            setUser(res.data || res);
+        } catch (err) {
+            console.error('Failed to load user:', err);
+            Cookies.remove('token');
+            setUser(null);
+        } finally {
             setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        loadUser();
     }, []);
 
     // Login Handler
     const login = async (credentials) => {
-        const data = await authService.login(credentials);
-        // Laravel response theke token save kora
-        const token = data?.access_token || data?.token;
+        const res = await authService.login(credentials);
+        const token = res?.access_token || res?.token || res?.data?.access_token;
+
         if (token) {
-            Cookies.set('token', token, { expires: 7 }); // 7 Days
-            setUser(data.user || data);
+            Cookies.set('token', token, { expires: 7 });
+            await loadUser(); // Instant fetch updated user name
         }
-        return data;
+        return res;
     };
 
     // Logout Handler
     const logout = async () => {
         try {
             await authService.logout();
-        } catch (e) {
-            console.error(e);
+        } catch (err) {
+            console.error(err);
         } finally {
             Cookies.remove('token');
             setUser(null);
@@ -48,7 +60,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, loading, isAuthenticated: !!user, refreshUser: loadUser }}>
             {children}
         </AuthContext.Provider>
     );
