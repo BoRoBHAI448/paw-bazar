@@ -46,6 +46,8 @@ export default function CheckoutPage() {
             setFormData((prev) => ({
                 ...prev,
                 shipping_name: user?.name || user?.full_name || prev.shipping_name,
+                phone: user?.phone || prev.phone,
+                address: user?.address || prev.address,
             }));
         }
     }, [user]);
