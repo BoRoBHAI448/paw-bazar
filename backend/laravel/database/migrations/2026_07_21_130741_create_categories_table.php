@@ -15,7 +15,7 @@ return new class extends Migration
         $table->id();
         $table->string('name');              // Category Name (e.g., Dry Food, Wet Food)
         $table->string('slug')->unique();    // URL-friendly name (e.g., dry-food)
-        $table->string('image')->nullable(); // Category Image URL
+        $table->text('image')->nullable(); // Category Image URL
         $table->timestamps();
     });
 }

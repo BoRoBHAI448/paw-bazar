@@ -22,7 +22,7 @@ return new class extends Migration
         $table->text('description')->nullable();
         $table->decimal('price', 10, 2);             // 450.00
         $table->integer('stock')->default(0);        // Available stock
-        $table->string('image')->nullable();
+        $table->text('image')->nullable();
         $table->boolean('is_active')->default(true); // Active/Inactive
         $table->timestamps();
     });

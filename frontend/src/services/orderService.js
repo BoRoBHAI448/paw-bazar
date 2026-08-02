@@ -1,15 +1,16 @@
 import indexApi from './api';
 
 export const orderService = {
-    // Submit new order
+    // Submit a new order (requires auth)
     createOrder: async (orderData) => {
         const response = await indexApi.post('/orders', orderData);
         return response.data;
     },
 
-    // Get Logged-in User's Orders
+    // Get the logged-in user's own order history
     getUserOrders: async () => {
-        const response = await indexApi.get('/orders'); // ba /my-orders (Laravel route onujayi)
+        const response = await indexApi.get('/orders');
+        // Backend returns { success: true, orders: [...] }
         return response.data;
     },
 };
