@@ -1,8 +1,9 @@
 import { productService } from '@/services/productService';
-import { Star, ShieldCheck, Truck, RotateCcw, ArrowLeft, ShoppingCart } from 'lucide-react';
+import { Star, ShieldCheck, Truck, RotateCcw, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import AddToCartButton from '@/components/products/AddToCartButton';
 
-// Backend theke single product data fetch
+// Backend থেকে single product data fetch
 async function getSingleProduct(id) {
     try {
         const data = await productService.getProductById(id);
@@ -14,7 +15,6 @@ async function getSingleProduct(id) {
 }
 
 export default async function ProductDetailPage({ params }) {
-    // Dynamic Route Parameters theke ID extract
     const { id } = await params;
     const product = await getSingleProduct(id);
 
@@ -25,8 +25,11 @@ export default async function ProductDetailPage({ params }) {
             <div className="max-w-7xl mx-auto px-4 py-20 text-center">
                 <h2 className="text-2xl font-bold text-slate-800 mb-4">Product Not Found!</h2>
                 <p className="text-slate-500 mb-6">The product you are looking for does not exist or has been removed.</p>
-                <Link href="/" className="bg-teal-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-teal-700 transition-all">
-                    Back to Home
+                <Link
+                    href="/products"
+                    className="bg-teal-600 text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-teal-700 transition-all"
+                >
+                    Back to Shop
                 </Link>
             </div>
         );
@@ -36,7 +39,10 @@ export default async function ProductDetailPage({ params }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
             {/* Back Button */}
-            <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors">
+            <Link
+                href="/products"
+                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-teal-600 font-medium transition-colors"
+            >
                 <ArrowLeft className="w-4 h-4" /> Back to Products
             </Link>
 
@@ -81,8 +87,15 @@ export default async function ProductDetailPage({ params }) {
                             <span className="text-3xl font-extrabold text-teal-700">
                                 ৳{product?.price || '0.00'}
                             </span>
-                            <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200">
-                                In Stock ({product?.stock ?? 10} available)
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-md border ${
+                                product?.stock > 0
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-red-50 text-red-600 border-red-200'
+                            }`}>
+                                {product?.stock > 0
+                                    ? `In Stock (${product.stock} available)`
+                                    : 'Out of Stock'
+                                }
                             </span>
                         </div>
 
@@ -90,22 +103,19 @@ export default async function ProductDetailPage({ params }) {
                         <div className="pt-4 border-t border-slate-100">
                             <h3 className="text-sm font-bold text-slate-800 mb-2">Product Description</h3>
                             <p className="text-slate-600 text-sm leading-relaxed">
-                                {product?.description || 'Provides balanced nutrition for adult cats. Formulated with high-quality protein to support lean muscles and essential vitamins for a healthy immune system.'}
+                                {product?.description ||
+                                    'Provides balanced nutrition for adult cats. Formulated with high-quality protein to support lean muscles and essential vitamins for a healthy immune system.'}
                             </p>
                         </div>
                     </div>
 
-                    {/* Actions: Add to Cart */}
+                    {/* Actions: Add to Cart (Client Component) */}
                     <div className="space-y-4 pt-6 border-t border-slate-100">
-                        <div className="flex gap-4">
-                            <button className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all text-sm">
-                                <ShoppingCart className="w-5 h-5" />
-                                Add to Shopping Cart
-                            </button>
-                        </div>
+                        {/* ✅ Client Component handles cart interaction */}
+                        <AddToCartButton product={product} />
 
                         {/* Delivery & Assurance Guarantees */}
-                        <div className="grid grid-cols-3 gap-2 pt-4 text-center">
+                        <div className="grid grid-cols-3 gap-2 pt-2 text-center">
                             <div className="p-3 bg-slate-50 rounded-xl flex flex-col items-center gap-1">
                                 <Truck className="w-5 h-5 text-teal-600" />
                                 <span className="text-[11px] font-medium text-slate-600">Fast Shipping</span>
@@ -120,11 +130,8 @@ export default async function ProductDetailPage({ params }) {
                             </div>
                         </div>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }

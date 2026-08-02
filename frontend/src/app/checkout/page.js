@@ -32,6 +32,15 @@ export default function CheckoutPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
+    const { loading: authLoading } = authContext;
+
+    // ─── Auth Guard: লগইন না থাকলে redirect করো ───
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/login?redirect=/checkout');
+        }
+    }, [user, authLoading, router]);
+
     useEffect(() => {
         if (user) {
             setFormData((prev) => ({
