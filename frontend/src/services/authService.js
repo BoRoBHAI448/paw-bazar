@@ -19,5 +19,10 @@ export const authService = {
     // Get Current User Profile
     getProfile: async () => {
         return await indexApi.get('/user');
+    },
+
+    // Update User Profile
+    updateProfile: async (userData) => {
+        return await indexApi.put('/profile', userData);
     }
 };

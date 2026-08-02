@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { adminService } from '@/services/adminService';
+import OrderDetailsModal from '@/components/admin/OrderDetailsModal';
 import { Loader2, PackageSearch, AlertCircle, RefreshCw } from 'lucide-react';
 
 const STATUS_OPTIONS = ['pending', 'processing', 'completed', 'cancelled'];
 
 const STATUS_STYLES = {
-    pending:    'bg-amber-100 text-amber-700 border-amber-200',
+    pending: 'bg-amber-100 text-amber-700 border-amber-200',
     processing: 'bg-blue-100 text-blue-700 border-blue-200',
-    completed:  'bg-emerald-100 text-emerald-700 border-emerald-200',
-    cancelled:  'bg-red-100 text-red-700 border-red-200',
+    completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    cancelled: 'bg-red-100 text-red-700 border-red-200',
 };
 
 export default function AdminOrdersPage() {
@@ -18,6 +19,7 @@ export default function AdminOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [updatingId, setUpdatingId] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     const fetchOrders = async () => {
         try {
@@ -42,6 +44,8 @@ export default function AdminOrdersPage() {
         setOrders((prev) =>
             prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
         );
+        // Keep modal in sync if open
+        setSelectedOrder((prev) => (prev && prev.id === orderId ? { ...prev, status: newStatus } : prev));
         setUpdatingId(orderId);
 
         try {
@@ -49,6 +53,7 @@ export default function AdminOrdersPage() {
         } catch (err) {
             // Rollback on failure
             setOrders(previousOrders);
+            setSelectedOrder((prev) => (prev && prev.id === orderId ? { ...prev, status: previousOrders.find(o => o.id === orderId)?.status } : prev));
             alert(err?.response?.data?.message || 'Failed to update order status.');
         } finally {
             setUpdatingId(null);
@@ -119,6 +124,7 @@ export default function AdminOrdersPage() {
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Order</th>
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Customer</th>
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Items</th>
+                                    <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Address</th>
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Total</th>
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Date</th>
                                     <th className="text-left px-6 py-4 font-bold text-slate-500 text-xs uppercase tracking-wide">Status</th>
@@ -126,7 +132,11 @@ export default function AdminOrdersPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {orders.map((order) => (
-                                    <tr key={order.id} className="hover:bg-slate-50/60 transition-colors">
+                                    <tr
+                                        key={order.id}
+                                        onClick={() => setSelectedOrder(order)}
+                                        className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                                    >
                                         <td className="px-6 py-4 font-bold text-slate-700">#{order.id}</td>
                                         <td className="px-6 py-4">
                                             <div className="font-semibold text-slate-700">{order.user?.name || 'Unknown'}</div>
@@ -142,9 +152,12 @@ export default function AdminOrdersPage() {
                                                 ))}
                                             </div>
                                         </td>
+                                        <td className="px-6 py-4 text-slate-500 text-xs max-w-[180px] truncate" title={order.shipping_address}>
+                                            {order.shipping_address || '—'}
+                                        </td>
                                         <td className="px-6 py-4 font-bold text-slate-700">{formatCurrency(order.total_amount)}</td>
                                         <td className="px-6 py-4 text-slate-500">{formatDate(order.created_at)}</td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                                             <select
                                                 value={order.status}
                                                 disabled={updatingId === order.id}
@@ -165,6 +178,14 @@ export default function AdminOrdersPage() {
                     </div>
                 </div>
             )}
+
+            {/* Order Details Modal */}
+            <OrderDetailsModal
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+                onStatusChange={handleStatusChange}
+                updating={updatingId === selectedOrder?.id}
+            />
         </div>
     );
 }

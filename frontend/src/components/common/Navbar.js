@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShoppingCart, User, LogOut, Search, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Search, LayoutDashboard, UserCircle, PackageSearch, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 
@@ -14,14 +14,27 @@ export default function Navbar() {
 
     const [isMounted, setIsMounted] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const displayName     = user?.name || user?.full_name || (user?.email ? user.email.split('@')[0] : 'User');
-    const displayInitial  = displayName !== 'User' ? displayName.charAt(0).toUpperCase() : 'U';
-    const isAdmin         = user?.role === 'admin';
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const displayName = user?.name || user?.full_name || (user?.email ? user.email.split('@')[0] : 'User');
+    const displayInitial = displayName !== 'User' ? displayName.charAt(0).toUpperCase() : 'U';
+    const isAdmin = user?.role === 'admin';
 
     // ─── Search Handler ──────────────────────────────
     const handleSearch = (e) => {
@@ -35,6 +48,11 @@ export default function Navbar() {
         if (e.key === 'Enter') {
             handleSearch(e);
         }
+    };
+
+    const handleLogout = () => {
+        setDropdownOpen(false);
+        logout();
     };
 
     return (
@@ -99,9 +117,12 @@ export default function Navbar() {
                                     </Link>
                                 )}
 
-                                {/* User Info */}
-                                <div className="flex items-center gap-3 bg-teal-50/70 border border-teal-100 pl-3 pr-2 py-1.5 rounded-full">
-                                    <div className="flex items-center gap-2">
+                                {/* My Account Dropdown */}
+                                <div className="relative" ref={dropdownRef}>
+                                    <button
+                                        onClick={() => setDropdownOpen((v) => !v)}
+                                        className="flex items-center gap-2 bg-teal-50/70 hover:bg-teal-100 border border-teal-100 pl-3 pr-2 py-1.5 rounded-full transition-all"
+                                    >
                                         <div className="w-7 h-7 bg-teal-600 text-white font-bold text-xs rounded-full flex items-center justify-center uppercase">
                                             {displayInitial}
                                         </div>
@@ -115,14 +136,38 @@ export default function Navbar() {
                                                 </span>
                                             )}
                                         </div>
-                                    </div>
-                                    <button
-                                        onClick={logout}
-                                        title="Logout"
-                                        className="p-1 text-slate-400 hover:text-red-600 transition-colors ml-1"
-                                    >
-                                        <LogOut className="w-4 h-4" />
+                                        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                                     </button>
+
+                                    {/* Dropdown Menu */}
+                                    {dropdownOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden py-1.5 z-50">
+                                            <Link
+                                                href="/profile"
+                                                onClick={() => setDropdownOpen(false)}
+                                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors"
+                                            >
+                                                <UserCircle className="w-4 h-4" />
+                                                My Profile
+                                            </Link>
+                                            <Link
+                                                href="/orders"
+                                                onClick={() => setDropdownOpen(false)}
+                                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-teal-50 hover:text-teal-700 transition-colors"
+                                            >
+                                                <PackageSearch className="w-4 h-4" />
+                                                My Orders
+                                            </Link>
+                                            <div className="border-t border-slate-100 my-1" />
+                                            <button
+                                                onClick={handleLogout}
+                                                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                                            >
+                                                <LogOut className="w-4 h-4" />
+                                                Logout
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ) : (

@@ -87,6 +87,44 @@ class AuthController extends Controller
         ], 200);
     }
 
+// Update Logged-in User Profile
+// Update Logged-in User Profile
+public function updateProfile(Request $request)
+{
+    $user = $request->user();
+
+    $validator = Validator::make($request->all(), [
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|string|email|max:255|unique:users,email,' . $user->id,
+        'phone'    => 'nullable|string|max:20',
+        'address'  => 'nullable|string|max:500',
+        'password' => 'nullable|string|min:6',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors'  => $validator->errors()
+        ], 422);
+    }
+
+    $user->name    = $request->name;
+    $user->email   = $request->email;
+    $user->phone   = $request->phone;
+    $user->address = $request->address;
+
+    if ($request->filled('password')) {
+        $user->password = Hash::make($request->password);
+    }
+
+    $user->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Profile updated successfully!',
+        'user'    => $user
+    ], 200);
+}
     // User Logout
     public function logout(Request $request)
     {
